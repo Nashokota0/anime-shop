@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anime Shop</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
+body{
+  background:#0d0d0d;
+  color:white;
+  min-height:100vh;
+  padding:20px;
+}
+
+.container{
+  max-width:500px;
+  margin:auto;
+  background:#1a1a1a;
+  padding:25px;
+  border-radius:18px;
+  box-shadow:0 0 25px rgba(255,0,0,0.3);
+}
+
+.title{
+  text-align:center;
+  color:#ff2e63;
+  margin-bottom:20px;
+}
+
+input, select{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border:none;
+  border-radius:10px;
+  background:#2a2a2a;
+  color:white;
+  font-size:15px;
+}
+
+input:focus, select:focus{
+  outline:none;
+  background:#333;
+  box-shadow:0 0 10px rgba(255,46,99,0.5);
+}
+
+.error-text{
+  color:#ff4d7f;
+  font-size:12px;
+  margin-top:5px;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:18px;
+  border:none;
+  border-radius:10px;
+  background:#ff2e63;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+  transition:0.3s;
+  font-weight:bold;
+}
+
+button:hover{
+  background:#ff4d7f;
+}
+
+button:active{
+  transform:scale(0.98);
+}
+
+.hidden{
+  display:none;
+}
+
+.switch{
+  text-align:center;
+  margin-top:15px;
+}
+
+.switch span{
+  color:#ff2e63;
+  cursor:pointer;
+  text-decoration:underline;
+}
+
+.product{
+  background:#252525;
+  padding:15px;
+  border-radius:12px;
+  margin-top:10px;
+  border-left:4px solid #ff2e63;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.product:hover{
+  background:#2d2d2d;
+  box-shadow:0 0 10px rgba(255,46,99,0.2);
+}
+
+.product.selected{
+  background:#1a3a1a;
+  border-left-color:#00ff00;
+  box-shadow:0 0 10px rgba(0,255,0,0.3);
+}
+
+.product h3{
+  color:#ff4d7f;
+}
+
+.product p{
+  font-size:14px;
+  margin-top:8px;
+}
+
+.product-price{
+  color:#00ff00;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+.payment-box{
+  margin-top:15px;
+  background:#2b2b2b;
+  padding:15px;
+  border-radius:10px;
+  display:none;
+  border:1px solid #ff2e63;
+}
+
+.payment-box h3{
+  color:#ff2e63;
+}
+
+.success{
+  text-align:center;
+  color:lime;
+  margin-top:15px;
+  display:none;
+  background:#1a2a1a;
+  padding:15px;
+  border-radius:10px;
+  border:1px solid #00ff00;
+}
+
+.logout-btn{
+  background:#444;
+  margin-top:10px;
+}
+
+.logout-btn:hover{
+  background:#555;
+}
+
+.order-summary{
+  background:#252525;
+  padding:15px;
+  border-radius:10px;
+  margin-top:15px;
+  display:none;
+}
+
+.order-summary h3{
+  color:#ff2e63;
+  margin-bottom:10px;
+}
+
+.summary-item{
+  padding:8px 0;
+  border-bottom:1px solid #333;
+}
+
+.summary-item:last-child{
+  border-bottom:none;
+}
+
+.total-price{
+  color:#00ff00;
+  font-weight:bold;
+  font-size:18px;
+  margin-top:10px;
+}
+
+.info-box{
+  background:#2a2a2a;
+  padding:12px;
+  border-radius:8px;
+  margin-top:10px;
+  font-size:13px;
+  border-left:3px solid #ff2e63;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- LOGIN -->
+  <div id="loginPage">
+    <h2 class="title">🎌 Anime Shop Login</h2>
+
+    <input type="text" id="loginPhone" placeholder="ফোন নম্বর (01XXXXXXXXX)">
+    <div class="error-text" id="loginPhoneError"></div>
+
+    <input type="password" id="loginPassword" placeholder="পাসওয়ার্ড (৬ অক্ষর ন্যূনতম)">
+    <div class="error-text" id="loginPasswordError"></div>
+
+    <button onclick="login()">Login</button>
+
+    <div class="switch">
+      নতুন অ্যাকাউন্ট?
+      <span onclick="showSignup()">Sign Up</span>
+    </div>
+
+    <div class="info-box">
+      📌 ডেমো অ্যাকাউন্ট: ০১৭০০০০০০০০ / পাসওয়ার্ড: ১২৩৪৫৬
+    </div>
+  </div>
+
+  <!-- SIGNUP -->
+  <div id="signupPage" class="hidden">
+    <h2 class="title">🎌 নতুন অ্যাকাউন্ট তৈরি করুন</h2>
+
+    <input type="text" id="signupName" placeholder="আপনার নাম">
+    <div class="error-text" id="signupNameError"></div>
+
+    <input type="text" id="signupPhone" placeholder="ফোন নম্বর (01XXXXXXXXX)">
+    <div class="error-text" id="signupPhoneError"></div>
+
+    <input type="password" id="signupPassword" placeholder="পাসওয়ার্ড (৬ অক্ষর ন্যূনতম)">
+    <div class="error-text" id="signupPasswordError"></div>
+
+    <input type="password" id="signupConfirmPassword" placeholder="পাসওয়ার্ড কনফার্ম করুন">
+    <div class="error-text" id="signupConfirmPasswordError"></div>
+
+    <button onclick="signup()">Sign Up</button>
+
+    <div class="switch">
+      ইতিমধ্যে অ্যাকাউন্ট আছে?
+      <span onclick="showLogin()">Login</span>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div id="shopPage" class="hidden">
+    <h2 class="title">🛍️ Anime Product Shop</h2>
+
+    <div style="text-align:center; color:#ff4d7f; margin-bottom:15px;">
+      স্বাগতম, <span id="userGreeting"></span>!
+    </div>
+
+    <h3 style="color:#ff2e63; margin-top:20px;">পণ্য নির্বাচন করুন:</h3>
+
+    <!-- PRODUCT LIST -->
+    <div class="product" onclick="selectProduct(0, 'Solo Leveling Hoodie', 1200)">
+      <h3>🎌 Solo Leveling Hoodie</h3>
+      <p>উচ্চমানের কটন হুডি</p>
+      <div class="product-price">৳ 1200</div>
+    </div>
+
+    <div class="product" onclick="selectProduct(1, 'Naruto T-Shirt', 850)">
+      <h3>👕 Naruto T-Shirt</h3>
+      <p>ডিজাইনার প্রিন্ট টি-শার্ট</p>
+      <div class="product-price">৳ 850</div>
+    </div>
+
+    <div class="product" onclick="selectProduct(2, 'Attack On Titan Poster', 500)">
+      <h3>📜 Attack On Titan Poster</h3>
+      <p>হাই কোয়ালিটি পোস্টার</p>
+      <div class="product-price">৳ 500</div>
+    </div>
+
+    <!-- ORDER SUMMARY -->
+    <div class="order-summary" id="orderSummary">
+      <h3>অর্ডার সারাংশ:</h3>
+      <div class="summary-item">
+        পণ্য: <span id="summaryProduct"></span>
+      </div>
+      <div class="summary-item">
+        দাম: <span id="summaryPrice"></span>
+      </div>
+      <div class="total-price">
+        মোট: <span id="summaryTotal">০ ৳</span>
+      </div>
+    </div>
+
+    <h3 style="color:#ff2e63; margin-top:20px;">অর্ডার তথ্য:</h3>
+
+    <!-- ORDER FORM -->
+    <input type="text" id="customerName" placeholder="আপনার নাম">
+    <div class="error-text" id="customerNameError"></div>
+
+    <input type="text" id="customerPhone" placeholder="ডেলিভারি ফোন নম্বর (01XXXXXXXXX)">
+    <div class="error-text" id="customerPhoneError"></div>
+
+    <select id="paymentMethod" onchange="changePaymentMethod()">
+      <option value="">পেমেন্ট মেথড সিলেক্ট করুন</option>
+      <option value="bkash">💳 বিকাশ</option>
+      <option value="cash">💰 Cash On Delivery</option>
+    </select>
+    <div class="error-text" id="paymentMethodError"></div>
+
+    <!-- PAYMENT INFO -->
+    <div class="payment-box" id="paymentBox"></div>
+
+    <button onclick="placeOrder()" style="margin-top:20px;">অর্ডার করুন 🛒</button>
+
+    <button class="logout-btn" onclick="logout()">Logout</button>
+
+    <div class="success" id="successMessage">
+      ✅ অর্ডার সফল হয়েছে!<br>
+      <small>আমরা শীঘ্রই যোগাযোগ করব।</small>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+// ============= PAGE REFERENCES =============
+const loginPage = document.getElementById("loginPage");
+const signupPage = document.getElementById("signupPage");
+const shopPage = document.getElementById("shopPage");
+
+// ============= SELECTED PRODUCT =============
+let selectedProduct = null;
+
+// ============= AUTO LOGIN =============
+if(localStorage.getItem("loggedIn") === "true"){
+  const userName = localStorage.getItem("userName");
+  document.getElementById("userGreeting").textContent = userName;
+  loginPage.classList.add("hidden");
+  shopPage.classList.remove("hidden");
+}
+
+// ============= PAGE SWITCH =============
+function showSignup(){
+  clearErrors();
+  loginPage.classList.add("hidden");
+  signupPage.classList.remove("hidden");
+}
+
+function showLogin(){
+  clearErrors();
+  signupPage.classList.add("hidden");
+  loginPage.classList.remove("hidden");
+}
+
+// ============= VALIDATION FUNCTIONS =============
+function validatePhone(phone){
+  const phoneRegex = /^01[0-9]{9}$/;
+  return phoneRegex.test(phone);
+}
+
+function validateName(name){
+  return name.trim().length >= 2;
+}
+
+function validatePassword(password){
+  return password.length >= 6;
+}
+
+function clearErrors(){
+  document.querySelectorAll(".error-text").forEach(el => el.textContent = "");
+}
+
+// ============= HASH PASSWORD (SIMPLE SECURITY) =============
+function hashPassword(password){
+  let hash = 0;
+  for(let i = 0; i < password.length; i++){
+    const char = password.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return hash.toString();
+}
+
+// ============= SIGNUP =============
+function signup(){
+  clearErrors();
+
+  const name = document.getElementById("signupName").value.trim();
+  const phone = document.getElementById("signupPhone").value.trim();
+  const password = document.getElementById("signupPassword").value;
+  const confirmPassword = document.getElementById("signupConfirmPassword").value;
+
+  let hasError = false;
+
+  if(!validateName(name)){
+    document.getElementById("signupNameError").textContent = "নাম কমপক্ষে ২ অক্ষর হতে হবে";
+    hasError = true;
+  }
+
+  if(!validatePhone(phone)){
+    document.getElementById("signupPhoneError").textContent = "সঠিক ফোন নম্বর প্রবেশ করুন (01XXXXXXXXX)";
+    hasError = true;
+  }
+
+  if(!validatePassword(password)){
+    document.getElementById("signupPasswordError").textContent = "পাসওয়ার্ড কমপক্ষে ৬ অক্ষর হতে হবে";
+    hasError = true;
+  }
+
+  if(password !== confirmPassword){
+    document.getElementById("signupConfirmPasswordError").textContent = "পাসওয়ার্ড মিলছে না";
+    hasError = true;
+  }
+
+  if(hasError) return;
+
+  // CHECK IF USER ALREADY EXISTS
+  const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
+  if(existingUsers.some(user => user.phone === phone)){
+    document.getElementById("signupPhoneError").textContent = "এই ফোন নম্বর ইতিমধ্যে রেজিস্টার করা আছে";
+    return;
+  }
+
+  const user = {
+    name,
+    phone,
+    password: hashPassword(password)
+  };
+
+  existingUsers.push(user);
+  localStorage.setItem("users", JSON.stringify(existingUsers));
+
+  alert("✅ অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে!");
+  clearSignupForm();
+  showLogin();
+}
+
+function clearSignupForm(){
+  document.getElementById("signupName").value = "";
+  document.getElementById("signupPhone").value = "";
+  document.getElementById("signupPassword").value = "";
+  document.getElementById("signupConfirmPassword").value = "";
+}
+
+// ============= LOGIN =============
+function login(){
+  clearErrors();
+
+  const phone = document.getElementById("loginPhone").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  let hasError = false;
+
+  if(!validatePhone(phone)){
+    document.getElementById("loginPhoneError").textContent = "সঠিক ফোন নম্বর প্রবেশ করুন";
+    hasError = true;
+  }
+
+  if(!validatePassword(password)){
+    document.getElementById("loginPasswordError").textContent = "পাসওয়ার্ড প্রবেশ করুন";
+    hasError = true;
+  }
+
+  if(hasError) return;
+
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  
+  // ADD DEMO USER IF NOT EXISTS
+  if(!users.some(u => u.phone === "01700000000")){
+    users.push({
+      name: "Demo User",
+      phone: "01700000000",
+      password: hashPassword("123456")
+    });
+    localStorage.setItem("users", JSON.stringify(users));
+  }
+
+  const user = users.find(u => u.phone === phone && u.password === hashPassword(password));
+
+  if(user){
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("userName", user.name);
+    localStorage.setItem("userPhone", user.phone);
+
+    document.getElementById("userGreeting").textContent = user.name;
+    clearLoginForm();
+    selectedProduct = null;
+    clearOrderForm();
+    
+    loginPage.classList.add("hidden");
+    shopPage.classList.remove("hidden");
+  }
+  else{
+    document.getElementById("loginPasswordError").textContent = "ভুল ফোন নম্বর অথবা পাসওয়ার্ড!";
+  }
+}
+
+function clearLoginForm(){
+  document.getElementById("loginPhone").value = "";
+  document.getElementById("loginPassword").value = "";
+}
+
+// ============= PRODUCT SELECTION =============
+function selectProduct(index, name, price){
+  selectedProduct = { index, name, price };
+
+  // UPDATE UI
+  document.querySelectorAll(".product").forEach((el, i) => {
+    if(i === index){
+      el.classList.add("selected");
+    } else {
+      el.classList.remove("selected");
+    }
+  });
+
+  // SHOW ORDER SUMMARY
+  document.getElementById("orderSummary").style.display = "block";
+  document.getElementById("summaryProduct").textContent = name;
+  document.getElementById("summaryPrice").textContent = "৳ " + price;
+  document.getElementById("summaryTotal").textContent = "৳ " + price;
+}
+
+// ============= PAYMENT METHOD CHANGE =============
+function changePaymentMethod(){
+  const paymentMethod = document.getElementById("paymentMethod").value;
+  const paymentBox = document.getElementById("paymentBox");
+
+  if(paymentMethod === "bkash"){
+    paymentBox.style.display = "block";
+    paymentBox.innerHTML = `
+      <h3>💳 বিকাশ পেমেন্ট</h3>
+      <p style="margin-top:10px; color:#00ff00; font-weight:bold;">
+        বিকাশ নম্বার: 017XXXXXXXX
+      </p>
+      <p style="margin-top:10px;">
+        উপরের বিকাশ নম্বারে টাকা পাঠান এবং অর্ডার কনফার্ম করুন।
+      </p>
+      <div style="margin-top:10px; background:#1a1a1a; padding:10px; border-radius:5px; font-size:12px;">
+        ⚠️ নিরাপত্তা টিপস: আপনার পিন কেউকে শেয়ার করবেন না।
+      </div>
+    `;
+  }
+  else if(paymentMethod === "cash"){
+    paymentBox.style.display = "block";
+    paymentBox.innerHTML = `
+      <h3>💰 Cash On Delivery</h3>
+      <p style="margin-top:10px;">
+        পণ্য হাতে পেয়ে ক্যাশ দিতে পারবেন।
+      </p>
+      <div style="margin-top:10px; background:#1a1a1a; padding:10px; border-radius:5px; font-size:12px;">
+        ✅ ডেলিভারি চার্জ: ৳ 50 (ঢাকার মধ্যে)
+      </div>
+    `;
+  }
+  else{
+    paymentBox.style.display = "none";
+  }
+}
+
+// ============= PLACE ORDER =============
+function placeOrder(){
+  clearErrors();
+
+  if(!selectedProduct){
+    alert("❌ প্রথমে একটি পণ্য নির্বাচন করুন!");
+    return;
+  }
+
+  const name = document.getElementById("customerName").value.trim();
+  const phone = document.getElementById("customerPhone").value.trim();
+  const payment = document.getElementById("paymentMethod").value;
+
+  let hasError = false;
+
+  if(!validateName(name)){
+    document.getElementById("customerNameError").textContent = "নাম কমপক্ষে ২ অক্ষর হতে হবে";
+    hasError = true;
+  }
+
+  if(!validatePhone(phone)){
+    document.getElementById("customerPhoneError").textContent = "সঠিক ফোন নম্বর প্রবেশ করুন";
+    hasError = true;
+  }
+
+  if(!payment){
+    document.getElementById("paymentMethodError").textContent = "পেমেন্ট মেথড নির্বাচন করুন";
+    hasError = true;
+  }
+
+  if(hasError) return;
+
+  // SAVE ORDER
+  const order = {
+    id: Date.now(),
+    orderDate: new Date().toLocaleString('bn-BD'),
+    customerName: name,
+    customerPhone: phone,
+    product: selectedProduct.name,
+    price: selectedProduct.price,
+    paymentMethod: payment,
+    userName: localStorage.getItem("userName"),
+    userPhone: localStorage.getItem("userPhone"),
+    status: "pending"
+  };
+
+  const orders = JSON.parse(localStorage.getItem("orders")) || [];
+  orders.push(order);
+  localStorage.setItem("orders", JSON.stringify(orders));
+
+  // SHOW SUCCESS MESSAGE
+  document.getElementById("successMessage").style.display = "block";
+  setTimeout(() => {
+    document.getElementById("successMessage").style.display = "none";
+    clearOrderForm();
+  }, 3000);
+}
+
+function clearOrderForm(){
+  document.getElementById("customerName").value = "";
+  document.getElementById("customerPhone").value = "";
+  document.getElementById("paymentMethod").value = "";
+  document.getElementById("orderSummary").style.display = "none";
+  document.getElementById("paymentBox").style.display = "none";
+  document.querySelectorAll(".product").forEach(el => el.classList.remove("selected"));
+  clearErrors();
+}
+
+// ============= LOGOUT =============
+function logout(){
+  localStorage.removeItem("loggedIn");
+  localStorage.removeItem("userName");
+  localStorage.removeItem("userPhone");
+  location.reload();
+}
+
+</script>
+
+</body>
+</html>
