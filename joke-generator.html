@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Joke Generator</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body{
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.container{
+  max-width:600px;
+  width:100%;
+  background:white;
+  padding:40px;
+  border-radius:20px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.3);
+  text-align:center;
+  animation:slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn{
+  from{
+    opacity:0;
+    transform:translateY(30px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.header{
+  margin-bottom:30px;
+}
+
+.header h1{
+  color:#667eea;
+  font-size:32px;
+  margin-bottom:10px;
+}
+
+.header p{
+  color:#666;
+  font-size:14px;
+}
+
+.joke-box{
+  background:linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  padding:30px;
+  border-radius:15px;
+  margin:30px 0;
+  min-height:120px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  color:white;
+  font-size:18px;
+  font-weight:bold;
+  line-height:1.6;
+  box-shadow:0 5px 20px rgba(245,87,108,0.3);
+  animation:fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn{
+  from{
+    opacity:0;
+  }
+  to{
+    opacity:1;
+  }
+}
+
+.joke-box.loading{
+  animation:pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse{
+  0%, 100%{
+    opacity:1;
+  }
+  50%{
+    opacity:0.6;
+  }
+}
+
+.joke-text{
+  margin-bottom:15px;
+  min-height:60px;
+}
+
+.joke-type{
+  font-size:12px;
+  opacity:0.8;
+  background:rgba(255,255,255,0.2);
+  padding:5px 10px;
+  border-radius:5px;
+  display:inline-block;
+  margin-top:10px;
+}
+
+.button-group{
+  display:flex;
+  gap:15px;
+  margin:30px 0;
+  flex-wrap:wrap;
+}
+
+button{
+  flex:1;
+  min-width:150px;
+  padding:14px 20px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:all 0.3s ease;
+}
+
+.btn-primary{
+  background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color:white;
+}
+
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 5px 20px rgba(102,126,234,0.4);
+}
+
+.btn-primary:active{
+  transform:translateY(0);
+}
+
+.btn-secondary{
+  background:#f0f0f0;
+  color:#333;
+}
+
+.btn-secondary:hover{
+  background:#e0e0e0;
+  transform:translateY(-2px);
+}
+
+.btn-primary:disabled, .btn-secondary:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.category-selector{
+  margin:20px 0;
+}
+
+.category-selector label{
+  display:block;
+  margin-bottom:10px;
+  color:#333;
+  font-weight:bold;
+}
+
+.category-selector select{
+  width:100%;
+  padding:12px;
+  border:2px solid #ddd;
+  border-radius:8px;
+  font-size:14px;
+  cursor:pointer;
+  transition:border-color 0.3s;
+}
+
+.category-selector select:focus{
+  outline:none;
+  border-color:#667eea;
+}
+
+.stats{
+  display:flex;
+  justify-content:space-around;
+  margin:20px 0;
+  padding:15px;
+  background:#f5f5f5;
+  border-radius:10px;
+}
+
+.stat-item{
+  text-align:center;
+}
+
+.stat-number{
+  font-size:24px;
+  font-weight:bold;
+  color:#667eea;
+}
+
+.stat-label{
+  font-size:12px;
+  color:#666;
+  margin-top:5px;
+}
+
+.error-message{
+  color:#f5576c;
+  font-size:14px;
+  margin:15px 0;
+  padding:10px;
+  background:#ffe0e0;
+  border-radius:8px;
+  display:none;
+}
+
+.success-message{
+  color:#667eea;
+  font-size:14px;
+  margin:15px 0;
+  padding:10px;
+  background:#e0e7ff;
+  border-radius:8px;
+  display:none;
+}
+
+.loading-spinner{
+  display:inline-block;
+  width:20px;
+  height:20px;
+  border:3px solid rgba(255,255,255,0.3);
+  border-top-color:white;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+.joke-history{
+  margin-top:30px;
+  padding:20px;
+  background:#f9f9f9;
+  border-radius:10px;
+}
+
+.joke-history h3{
+  color:#667eea;
+  margin-bottom:15px;
+  text-align:left;
+}
+
+.history-item{
+  background:white;
+  padding:10px;
+  margin:8px 0;
+  border-left:4px solid #667eea;
+  border-radius:5px;
+  font-size:13px;
+  color:#333;
+  text-align:left;
+  max-height:50px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.history-empty{
+  color:#999;
+  font-style:italic;
+  font-size:13px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>😂 Random Joke Generator</h1>
+    <p>প্রতিদিন হাসার নতুন কারণ খুঁজে পান!</p>
+  </div>
+
+  <!-- CATEGORY SELECTOR -->
+  <div class="category-selector">
+    <label>জোক ক্যাটাগরি বেছে নিন:</label>
+    <select id="categorySelect">
+      <option value="random">🎲 যেকোনো জোক (Random)</option>
+      <option value="general">😄 সাধারণ (General)</option>
+      <option value="knock-knock">🚪 Knock-Knock জোক</option>
+      <option value="programming">💻 প্রোগ্রামিং জোক</option>
+      <option value="dad">👨 ডাড জোক</option>
+      <option value="spooky">👻 ভূতুড়ে জোক</option>
+      <option value="knitting">🧶 Knitting জোক</option>
+    </select>
+  </div>
+
+  <!-- JOKE BOX -->
+  <div class="joke-box" id="jokeBox">
+    <div class="joke-text" id="jokeText">
+      প্রথম জোক পেতে নিচের বোতাম ক্লিক করুন! 👇
+    </div>
+    <div class="joke-type" id="jokeType">জোক লোড হচ্ছে...</div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="error-message" id="errorMessage"></div>
+  <div class="success-message" id="successMessage"></div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-item">
+      <div class="stat-number" id="jokeCount">0</div>
+      <div class="stat-label">মোট জোক</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number" id="favoriteCount">0</div>
+      <div class="stat-label">পছন্দের জোক</div>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="button-group">
+    <button class="btn-primary" id="getJokeBtn" onclick="getJoke()">নতুন জোক পান 🎉</button>
+    <button class="btn-secondary" id="favoriteBtn" onclick="toggleFavorite()">❤️ পছন্দে যোগ করুন</button>
+  </div>
+
+  <div class="button-group">
+    <button class="btn-secondary" onclick="copyToClipboard()">📋 কপি করুন</button>
+    <button class="btn-secondary" onclick="clearHistory()">🗑️ ইতিহাস সাফ করুন</button>
+  </div>
+
+  <!-- JOKE HISTORY -->
+  <div class="joke-history">
+    <h3>📜 সাম্প্রতিক জোক:</h3>
+    <div id="historyContainer">
+      <div class="history-empty">কোনো ইতিহাস নেই</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+// ============= API ENDPOINTS =============
+const JESTERCAPI = "https://v2.jokeapi.dev/joke";
+const JOKESAPI = "https://official-joke-api.appspot.com/random_joke";
+
+// ============= VARIABLES =============
+let currentJoke = null;
+let favorites = JSON.parse(localStorage.getItem("jokesFavorites")) || [];
+let history = JSON.parse(localStorage.getItem("jokesHistory")) || [];
+let jokesCount = parseInt(localStorage.getItem("jokesCount")) || 0;
+
+// ============= INITIALIZE =============
+document.addEventListener("DOMContentLoaded", function(){
+  updateStats();
+  updateHistory();
+});
+
+// ============= GET JOKE =============
+async function getJoke(){
+  const getJokeBtn = document.getElementById("getJokeBtn");
+  const favoriteBtn = document.getElementById("favoriteBtn");
+  const jokeBox = document.getElementById("jokeBox");
+  const category = document.getElementById("categorySelect").value;
+
+  // DISABLE BUTTON AND SHOW LOADING
+  getJokeBtn.disabled = true;
+  favoriteBtn.disabled = true;
+  jokeBox.classList.add("loading");
+
+  try{
+    let response;
+    
+    if(category === "random"){
+      // USE RANDOM API
+      const apis = [getJokeFromJesterAPI, getJokeFromJokesAPI];
+      const randomAPI = apis[Math.floor(Math.random() * apis.length)];
+      response = await randomAPI();
+    }
+    else if(category === "knock-knock" || category === "programming" || category === "dad" || category === "spooky" || category === "knitting"){
+      // USE JESTERAPI WITH CATEGORY
+      response = await getJokeFromJesterAPI(category);
+    }
+    else{
+      // GENERAL - USE JOKES API
+      response = await getJokeFromJokesAPI();
+    }
+
+    if(response){
+      currentJoke = response;
+      displayJoke(currentJoke);
+      
+      // ADD TO HISTORY
+      history.unshift({
+        joke: formatJokeForDisplay(currentJoke),
+        time: new Date().toLocaleTimeString('bn-BD'),
+        type: response.type || 'single'
+      });
+      
+      if(history.length > 10){
+        history.pop();
+      }
+      
+      localStorage.setItem("jokesHistory", JSON.stringify(history));
+      jokesCount++;
+      localStorage.setItem("jokesCount", jokesCount);
+      
+      updateStats();
+      updateHistory();
+      hideError();
+    }
+  }
+  catch(error){
+    showError("জোক লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+    console.error("Error fetching joke:", error);
+  }
+  finally{
+    getJokeBtn.disabled = false;
+    favoriteBtn.disabled = false;
+    jokeBox.classList.remove("loading");
+  }
+}
+
+// ============= GET JOKE FROM JESTERCAPI =============
+async function getJokeFromJesterAPI(category = "any"){
+  try{
+    const url = `${JESTERCAPI}/${category}?type=single,twopart`;
+    const response = await fetch(url);
+    
+    if(!response.ok) throw new Error("API Error");
+    
+    const data = await response.json();
+    
+    if(data.error){
+      return null;
+    }
+    
+    return {
+      setup: data.setup || "",
+      delivery: data.delivery || data.joke || "",
+      joke: data.joke || `${data.setup} ${data.delivery}`,
+      type: data.type || 'single',
+      category: data.category || 'general'
+    };
+  }
+  catch(error){
+    console.error("JesterAPI Error:", error);
+    return null;
+  }
+}
+
+// ============= GET JOKE FROM JOKES API =============
+async function getJokeFromJokesAPI(){
+  try{
+    const response = await fetch(JOKESAPI);
+    
+    if(!response.ok) throw new Error("API Error");
+    
+    const data = await response.json();
+    
+    return {
+      setup: data.setup || "",
+      punchline: data.punchline || "",
+      joke: `${data.setup} ${data.punchline}`,
+      type: 'twopart',
+      category: data.category || 'general'
+    };
+  }
+  catch(error){
+    console.error("JokesAPI Error:", error);
+    return null;
+  }
+}
+
+// ============= DISPLAY JOKE =============
+function displayJoke(joke){
+  const jokeText = document.getElementById("jokeText");
+  const jokeType = document.getElementById("jokeType");
+  
+  if(joke.type === "twopart" || joke.setup){
+    jokeText.innerHTML = `
+      <strong>${joke.setup || joke.setup}</strong><br><br>
+      <em>${joke.delivery || joke.punchline}</em>
+    `;
+  }
+  else{
+    jokeText.textContent = joke.joke || "জোক খুঁজে পাওয়া যায়নি।";
+  }
+  
+  jokeType.textContent = `${joke.type} | ${joke.category || 'general'}`;
+  
+  // CHECK IF IN FAVORITES
+  updateFavoriteButton();
+}
+
+// ============= FORMAT JOKE FOR DISPLAY =============
+function formatJokeForDisplay(joke){
+  if(joke.type === "twopart" || joke.setup){
+    return `${joke.setup} ${joke.delivery || joke.punchline}`;
+  }
+  return joke.joke;
+}
+
+// ============= TOGGLE FAVORITE =============
+function toggleFavorite(){
+  if(!currentJoke) return;
+  
+  const jokeText = formatJokeForDisplay(currentJoke);
+  const favoriteBtn = document.getElementById("favoriteBtn");
+  
+  const index = favorites.findIndex(fav => fav === jokeText);
+  
+  if(index === -1){
+    favorites.push(jokeText);
+    showSuccess("❤️ পছন্দের তালিকায় যোগ হয়েছে!");
+  }
+  else{
+    favorites.splice(index, 1);
+    showSuccess("💔 পছন্দের তালিকা থেকে সরিয়ে দেওয়া হয়েছে।");
+  }
+  
+  localStorage.setItem("jokesFavorites", JSON.stringify(favorites));
+  updateStats();
+  updateFavoriteButton();
+}
+
+// ============= UPDATE FAVORITE BUTTON =============
+function updateFavoriteButton(){
+  const favoriteBtn = document.getElementById("favoriteBtn");
+  const jokeText = formatJokeForDisplay(currentJoke);
+  
+  if(favorites.some(fav => fav === jokeText)){
+    favoriteBtn.style.background = "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)";
+    favoriteBtn.style.color = "white";
+  }
+  else{
+    favoriteBtn.style.background = "#f0f0f0";
+    favoriteBtn.style.color = "#333";
+  }
+}
+
+// ============= COPY TO CLIPBOARD =============
+function copyToClipboard(){
+  if(!currentJoke) return;
+  
+  const jokeText = formatJokeForDisplay(currentJoke);
+  navigator.clipboard.writeText(jokeText).then(() => {
+    showSuccess("📋 জোক কপি হয়েছে!");
+  });
+}
+
+// ============= UPDATE STATS =============
+function updateStats(){
+  document.getElementById("jokeCount").textContent = jokesCount;
+  document.getElementById("favoriteCount").textContent = favorites.length;
+}
+
+// ============= UPDATE HISTORY =============
+function updateHistory(){
+  const historyContainer = document.getElementById("historyContainer");
+  
+  if(history.length === 0){
+    historyContainer.innerHTML = '<div class="history-empty">কোনো ইতিহাস নেই</div>';
+    return;
+  }
+  
+  historyContainer.innerHTML = history.map((item, index) => 
+    `<div class="history-item" title="${item.joke}">${index + 1}. ${item.joke.substring(0, 60)}...</div>`
+  ).join("");
+}
+
+// ============= CLEAR HISTORY =============
+function clearHistory(){
+  if(confirm("আপনি কি সত্যিই ইতিহাস সাফ করতে চান?")){
+    history = [];
+    localStorage.setItem("jokesHistory", JSON.stringify(history));
+    updateHistory();
+    showSuccess("🗑️ ইতিহাস সাফ করা হয়েছে!");
+  }
+}
+
+// ============= SHOW ERROR =============
+function showError(message){
+  const errorDiv = document.getElementById("errorMessage");
+  errorDiv.textContent = message;
+  errorDiv.style.display = "block";
+  setTimeout(() => {
+    errorDiv.style.display = "none";
+  }, 4000);
+}
+
+// ============= HIDE ERROR =============
+function hideError(){
+  document.getElementById("errorMessage").style.display = "none";
+}
+
+// ============= SHOW SUCCESS =============
+function showSuccess(message){
+  const successDiv = document.getElementById("successMessage");
+  successDiv.textContent = message;
+  successDiv.style.display = "block";
+  setTimeout(() => {
+    successDiv.style.display = "none";
+  }, 3000);
+}
+
+</script>
+
+</body>
+</html>
